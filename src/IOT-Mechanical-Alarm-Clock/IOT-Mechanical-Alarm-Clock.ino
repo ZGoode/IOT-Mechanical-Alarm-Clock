@@ -25,17 +25,21 @@ long previousMillisDisplay = 0;
 long intervalDisplay = 10000;
 boolean displayOn = true;
 boolean 12Hour = true;
+boolean lightsOn = true;
 const boolean INVERT_DISPLAY = true; // true = pins at top | false = pins at the bottom
 
 const int externalLight = LED_BUILTIN;
-const int buttonPin = D7;
-const int I2C_DISPLAY_ADDRESS = 0x3c; // I2C Address of your Display (usually 0x3c or 0x3d)
-const int SDA_PIN = D2;
-const int SCL_PIN = D5;
-const int neopixelPin =  D4;
-const int LATCH = D3;
-const int CLK = D1;
 const int DATA = D0;
+const int CLK = D1;
+const int SDA_PIN = D2;
+const int LATCH = D3;
+const int buttonPin3 = D4;
+const int SCL_PIN = D5;
+const int buttonPin2 = D6;
+const int buttonPin1 = D7;
+const int neopixelPin =  D8;
+
+const int I2C_DISPLAY_ADDRESS = 0x3c; // I2C Address of your Display (usually 0x3c or 0x3d)
 
 const byte segmentOn[11] = {
   B00111111,  //0
@@ -98,7 +102,9 @@ void setup() {
 
   Serial.println();
   pinMode(externalLight, OUTPUT);
-  pinMode(buttonPin, INPUT);
+  pinMode(buttonPin1, INPUT);
+  pinMode(buttonPin2, INPUT);
+  pinMode(buttonPin3, INPUT);
   pinMode(LATCH, OUTPUT);
   pinMode(CLK, OUTPUT);
   pinMode(DATA, OUTPUT);
@@ -168,6 +174,7 @@ void loop() {
 
   delay(1);
 
+  //Display on/off
   if (displayOn == true) {
     displayOn = false;
     previousMillisDisplay = currentMillis;
@@ -186,15 +193,35 @@ void loop() {
     display.display();
   }
 
-  if (digitalRead(buttonPin) == LOW) {
+  if (digitalRead(buttonPin1) == LOW) {
     displayOn = true;
   }
+  //-------------------------
 
+  //update time
   if (lastHour != timeClient.getHours() || lastMinute != timeClient.getMinutes()) {
     updateTime();
   }
+  //-------------------------
 
-  rainbowCycle();
+  //lights
+  if (digitalRead(buttonPin2) == HIGH) {
+    rainbowCycle();
+    firstOff = true;
+  } else if (digitalRead(buttonPin2) == LOW) {
+    if (firstOff == true) {
+      for (int i = 0; i < NUMPIXELS; i++) {
+        pixels.setPixelColor(i, 0, 0, 0);
+      }
+      pixels.show();
+      firstOff = false;
+    }
+  }
+  //-------------------------
+
+  //add alarm clock functionality
+  
+  //-------------------------
 }
 
 void handleSystemReset() {
