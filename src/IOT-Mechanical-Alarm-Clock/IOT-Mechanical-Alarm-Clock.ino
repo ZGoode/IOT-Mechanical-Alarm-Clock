@@ -24,6 +24,7 @@ int externalLight = LED_BUILTIN;
 long previousMillisDisplay = 0;
 long intervalDisplay = 10000;
 boolean displayOn = true;
+boolean 12Hour = true;
 const boolean INVERT_DISPLAY = true; // true = pins at top | false = pins at the bottom
 
 const int externalLight = LED_BUILTIN;
@@ -32,6 +33,34 @@ const int I2C_DISPLAY_ADDRESS = 0x3c; // I2C Address of your Display (usually 0x
 const int SDA_PIN = D2;
 const int SCL_PIN = D5;
 const int neopixelPin =  D4;
+
+const byte segmentOn[11] = {
+  B00111111,  //0
+  B00000110,  //1
+  B01011011,  //2
+  B01001111,  //3
+  B01100110,  //4
+  B01101101,  //5
+  B01111101,  //6
+  B00000111,  //7
+  B01111111,  //8
+  B01101111,   //9
+  B00000000   //blank
+};
+
+const byte segmentOff[11] = {
+  B11000000,  //0
+  B11111001,  //1
+  B10100100,  //2
+  B10110000,  //3
+  B10011001,  //4
+  B10010010,  //5
+  B10000010,  //6
+  B11111000,  //7
+  B10000000,  //8
+  B10010000,   //9
+  B11111111   //blank
+};
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, neopixelPin, NEO_GRB + NEO_KHZ800);
 
@@ -56,6 +85,8 @@ uint32_t Wheel(byte WheelPos);
 void rainbowCycle();
 
 int rainbowCycleLoop0 = 0;
+int lastHour = 0;
+int lastMinute = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -151,6 +182,10 @@ void loop() {
 
   if (digitalRead(buttonPin) == LOW) {
     displayOn = true;
+  }
+
+  if (lastHour != timeClient.getHours() || lastMinute != timeClient.getMinutes()) {
+    updateTime();
   }
 
   rainbowCycle();
@@ -326,4 +361,13 @@ uint32_t Wheel(byte WheelPos) {
   }
   WheelPos -= 170;
   return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
+
+void updateTime () {
+  if () {
+    
+  }
+  if () {
+    
+  }
 }
