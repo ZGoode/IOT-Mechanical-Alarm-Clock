@@ -33,6 +33,9 @@ const int I2C_DISPLAY_ADDRESS = 0x3c; // I2C Address of your Display (usually 0x
 const int SDA_PIN = D2;
 const int SCL_PIN = D5;
 const int neopixelPin =  D4;
+const int LATCH = D3;
+const int CLK = D1;
+const int DATA = D0;
 
 const byte segmentOn[11] = {
   B00111111,  //0
@@ -96,6 +99,9 @@ void setup() {
   Serial.println();
   pinMode(externalLight, OUTPUT);
   pinMode(buttonPin, INPUT);
+  pinMode(LATCH, OUTPUT);
+  pinMode(CLK, OUTPUT);
+  pinMode(DATA, OUTPUT);
 
   readSettings();
 
@@ -364,10 +370,39 @@ uint32_t Wheel(byte WheelPos) {
 }
 
 void updateTime () {
-  if () {
-    
+  byte currentSegmentOn[4];
+  byte currentSegmentOff[4];
+  int hour0 = (timeClient.getHours() / 10);
+  int hour1 = (timeClient.getHours() % 10);
+  int minute0 = (timeClient.getMinutes() / 10);
+  int minute1 = (timeClient.getMinutes() % 10);
+
+  digitalWrite(LATCH, LOW);
+
+  if (timeClient.getHours() != lastHour) {
+    lastHour = timeClient.getHours();
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[hour1]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOff[hour1]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[hour0]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOff[hour0]);
+  } else {
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
   }
-  if () {
-    
+
+  if (timeClient.getMinutes() != lastMinute) {
+    lastMinute = timeClient.getMinutes();
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[minute1]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOff[minute1]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[minute0]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOff[minute0]);
+  } else {
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
+    shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
   }
+
 }
