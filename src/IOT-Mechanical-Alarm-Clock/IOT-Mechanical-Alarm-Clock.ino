@@ -10,7 +10,7 @@
 
 #include "HTML.h"
 
-#define VERSION "0.1a"
+#define VERSION "0.7a"
 #define HOSTNAME "IOT-ALARM-CLOCK"
 #define CONFIG "/conf.txt"
 #define WEBSERVER_PORT 80
@@ -405,4 +405,5 @@ void updateTime () {
     shiftOut(DATA, CLK, LSBFIRST, segmentOn[10]);
   }
 
+  digitalWrite(LATCH, HIGH);
 }
