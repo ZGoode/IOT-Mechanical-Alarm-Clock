@@ -1,5 +1,7 @@
 String parseHomePage();
 String parseConfigurePage();
+String getAlarmTemplate();
+String parseAlarmPage(String alarm);
 
 String footer = "<!-- Footer -->"
                 "<footer class='w3-bottom w3-center w3-black w3-padding-small w3-opacity w3-hover-opacity-off'>"
@@ -75,7 +77,7 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
 
 String alarmPage = "";
 
-String alarmTemplate = ""
+String alarmTemplate = "";
 
 String getAlarmTemplate() {
   return alarmTemplate;

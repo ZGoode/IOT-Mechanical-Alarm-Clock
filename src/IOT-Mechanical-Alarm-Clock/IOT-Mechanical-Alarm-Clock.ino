@@ -420,4 +420,4 @@ void updateTime () {
   digitalWrite(LATCH, HIGH);
 }
 
-void alarmFunction
+//void alarmFunction 
