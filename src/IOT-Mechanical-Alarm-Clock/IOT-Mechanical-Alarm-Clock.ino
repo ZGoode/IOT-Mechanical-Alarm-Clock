@@ -419,3 +419,5 @@ void updateTime () {
 
   digitalWrite(LATCH, HIGH);
 }
+
+void alarmFunction

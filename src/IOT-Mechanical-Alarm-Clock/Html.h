@@ -73,6 +73,20 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
                        "</div>"
                        "</div>";
 
+String alarmPage = "";
+
+String alarmTemplate = ""
+
+String getAlarmTemplate() {
+  return alarmTemplate;
+}
+
+String parseAlarmPage(String alarm) {
+  String form = header + alarmPage + footer;
+  form.replace("%ALARM&", alarm);
+  return form;
+}
+
 String parseConfigurePage() {
   return header + configurePage + footer;
 }
