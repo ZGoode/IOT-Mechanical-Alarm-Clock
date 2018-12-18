@@ -1,3 +1,5 @@
+#include <AFArray.h>
+#include <AFArrayType.h>
 #include <NTPClient.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
@@ -10,34 +12,32 @@
 
 #include "HTML.h"
 
-#define VERSION "0.7a"
+#define VERSION "0.8a"
 #define HOSTNAME "IOT-ALARM-CLOCK"
 #define CONFIG "/conf.txt"
 #define WEBSERVER_PORT 80
 #define NUMPIXELS 300 //change to however many are used
 
-WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "europe.pool.ntp.org", 3600, 60000);
-
-float timeZone = 0.0;
-int externalLight = LED_BUILTIN;
+int timeZone = 0;
 long previousMillisDisplay = 0;
+long previousMillisLight = 0;
 long intervalDisplay = 10000;
 boolean displayOn = true;
-boolean 12Hour = true;
-boolean lightsOn = true;
+boolean twelveHour = true;
+boolean alarmEnabled = true;
+boolean firstOff = true;
 const boolean INVERT_DISPLAY = true; // true = pins at top | false = pins at the bottom
 
-const int externalLight = LED_BUILTIN;
-const int DATA = D0;
-const int CLK = D1;
-const int SDA_PIN = D2;
-const int LATCH = D3;
-const int buttonPin3 = D4;
-const int SCL_PIN = D5;
-const int buttonPin2 = D6;
-const int buttonPin1 = D7;
-const int neopixelPin =  D8;
+const int buttonPin3 = A0;    //for the alarm snooze
+const int DATA = D0;          //for the shift register
+const int CLK = D1;           //for the shift register
+const int SDA_PIN = D2;       //for the screen
+const int LATCH = D3;         //for the shift register
+const int speaker = D4;       //for the speaker/alarm (figure this out later)
+const int SCL_PIN = D5;       //for the screen
+const int buttonPin2 = D6;    //for the lights
+const int buttonPin1 = D7;    //for the screen
+const int neopixelPin =  D8;  //for the lights
 
 const int I2C_DISPLAY_ADDRESS = 0x3c; // I2C Address of your Display (usually 0x3c or 0x3d)
 
@@ -68,6 +68,9 @@ const byte segmentOff[11] = {
   B10010000,   //9
   B11111111   //blank
 };
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP);
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, neopixelPin, NEO_GRB + NEO_KHZ800);
 
@@ -101,13 +104,16 @@ void setup() {
   delay(10);
 
   Serial.println();
-  pinMode(externalLight, OUTPUT);
   pinMode(buttonPin1, INPUT);
   pinMode(buttonPin2, INPUT);
   pinMode(buttonPin3, INPUT);
+  pinMode(speaker, OUTPUT);
   pinMode(LATCH, OUTPUT);
   pinMode(CLK, OUTPUT);
   pinMode(DATA, OUTPUT);
+
+  timeClient.setTimeOffset(3600);
+  timeClient.setUpdateInterval(60000);
 
   readSettings();
 
@@ -174,6 +180,8 @@ void loop() {
 
   delay(1);
 
+  unsigned long currentMillis = millis();
+
   //Display on/off
   if (displayOn == true) {
     displayOn = false;
@@ -220,25 +228,21 @@ void loop() {
   //-------------------------
 
   //add alarm clock functionality
-  
+
   //-------------------------
 }
 
 void handleSystemReset() {
-  if (!server.authenticate(www_username, www_password)) {
-    return server.requestAuthentication();
-  }
+  server.requestAuthentication();
   Serial.println("Reset System Configuration");
   if (SPIFFS.remove(CONFIG)) {
-    handleRoot();;
+    handleRoot();
     ESP.restart();
   }
 }
 
 void handleWifiReset() {
-  if (!server.authenticate(www_username, www_password)) {
-    return server.requestAuthentication();
-  }
+  server.requestAuthentication();
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   handleRoot();
@@ -247,24 +251,22 @@ void handleWifiReset() {
   ESP.restart();
 }
 
-void writeSettings() { //editthis
+void writeSettings() {
   // Save decoded message to SPIFFS file for playback on power up.
   File f = SPIFFS.open(CONFIG, "w");
   if (!f) {
     Serial.println("File open failed!");
   } else {
     Serial.println("Saving settings now...");
-    f.println("www_username=" + String(www_username));
-    f.println("www_password=" + String(www_password));
-    f.println("weatherKey=" + WeatherApiKey);
-    f.println("CityID=" + String(CityID));
-    f.println("isMetric=" + String(IS_METRIC));
+    f.println("timeZone=" + String(timeZone));
+    f.println("twelveHour=" + String(twelveHour));
+    f.println("alarmEnabled=" + String(alarmEnabled));
   }
   f.close();
   readSettings();
 }
 
-void readSettings() { //editthis
+void readSettings() {
   if (SPIFFS.exists(CONFIG) == false) {
     Serial.println("Settings File does not yet exists.");
     writeSettings();
@@ -275,52 +277,29 @@ void readSettings() { //editthis
   while (fr.available()) {
     line = fr.readStringUntil('\n');
 
-    if (line.indexOf("www_username=") >= 0) {
-      String temp = line.substring(line.lastIndexOf("www_username=") + 13);
-      temp.trim();
-      temp.toCharArray(www_username, sizeof(temp));
-      Serial.println("www_username=" + String(www_username));
+    if (line.indexOf("timeZone=") >= 0) {
+      timeZone = line.substring(line.lastIndexOf("timeZone=") + 9).toInt();
+      Serial.println("timeZone=" + String(timeZone));
     }
-    if (line.indexOf("www_password=") >= 0) {
-      String temp = line.substring(line.lastIndexOf("www_password=") + 13);
-      temp.trim();
-      temp.toCharArray(www_password, sizeof(temp));
-      Serial.println("www_password=" + String(www_password));
+    if (line.indexOf("twelveHour=") >= 0) {
+      twelveHour = line.substring(line.lastIndexOf("www_password=") + 11).toInt();
+      Serial.println("twelveHour=" + String(twelveHour));
     }
-    if (line.indexOf("weatherKey=") >= 0) {
-      WeatherApiKey = line.substring(line.lastIndexOf("weatherKey=") + 11);
-      WeatherApiKey.trim();
-      Serial.println("WeatherApiKey=" + WeatherApiKey);
-    }
-    if (line.indexOf("CityID=") >= 0) {
-      CityID = line.substring(line.lastIndexOf("CityID=") + 7).toInt();
-      Serial.println("CityID: " + String(CityID));
-    }
-    if (line.indexOf("isMetric=") >= 0) {
-      IS_METRIC = line.substring(line.lastIndexOf("isMetric=") + 9).toInt();
-      Serial.println("IS_METRIC=" + String(IS_METRIC));
+    if (line.indexOf("alarmEnabled=") >= 0) {
+      alarmEnabled = line.substring(line.lastIndexOf("alarmEnabled=") + 13).toInt();
+      Serial.println("alarmEnabled: " + String(alarmEnabled));
     }
   }
   fr.close();
-  weatherClient.updateWeatherApiKey(WeatherApiKey);
-  weatherClient.updateCityId(CityID);
-  weatherClient.setMetric(IS_METRIC);
-  weatherClient.updateCityId(CityID);
+  timeClient.end();
+  timeClient.setTimeOffset(timeZone);
+  timeClient.begin();
 }
 
 void handleUpdateConfigure() { //editthis
-  if (!server.authenticate(www_username, www_password)) {
-    return server.requestAuthentication();
-  }
-
-  String temp = server.arg("userid");
-  temp.toCharArray(www_username, sizeof(temp));
-  temp = server.arg("stationpassword");
-  temp.toCharArray(www_password, sizeof(temp));
-  OTA_Password = server.arg("otapassword");
-  WeatherApiKey = server.arg("openWeatherMapApiKey");
-  CityID = server.arg("city1").toInt();
-  IS_METRIC = server.hasArg("metric");
+  timeZone = server.arg("timezone").toInt();
+  twelveHour = server.hasArg("twelvehour");
+  alarmEnabled = server.hasArg("alarmenabled");
 
   writeSettings();
   handleConfigure();
@@ -349,15 +328,21 @@ int8_t getWifiQuality() {
   }
 }
 
-void handleConfigure() { //editthis
-  String form = parseConfigurePage();
-  form.replace("%USERID%", www_username);
-  form.replace("%STATIONPASSWORD%", www_password);
-  form.replace("%OTAPASSWORD%", OTA_Password);
-  form.replace("%WEATHERKEY%", WeatherApiKey);
-  form.replace("%CITY%", String(CityID));
+void handleConfigure() {
+  String isTwelveHourChecked;
+  String isAlarmEnabledChecked;
 
-  Serial.println(String(CityID));
+  if (twelveHour == true) {
+    isTwelveHourChecked = "checked='checked'";
+  }
+  if (alarmEnabled == true) {
+    isAlarmEnabledChecked = "checked='checked'";
+  }
+  String form = parseConfigurePage();
+  form.replace("%TIMEZONE%", String(timeZone));
+  form.replace("%TWELVEHOUR%", isTwelveHourChecked);
+  form.replace("%ALARMENABLED%", isAlarmEnabledChecked);
+
   server.send(200, "text/html", form);  // Configure portal for the cloud
 }
 
@@ -370,8 +355,8 @@ void initializePixels() {
 void rainbowCycle() {
   if (rainbowCycleLoop0 < 256) {
     unsigned long currentMillis = millis();
-    if (currentMillis - previousMillisArray[0] > 1) {
-      previousMillisArray[0] = currentMillis;
+    if (currentMillis - previousMillisLight > 1) {
+      previousMillisLight = currentMillis;
       for (int i = 0; i < pixels.numPixels(); i++) {
         pixels.setPixelColor(i, Wheel(((i * 256 / pixels.numPixels()) + rainbowCycleLoop0) & 255));
       }
