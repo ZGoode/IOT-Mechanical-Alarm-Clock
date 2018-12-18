@@ -24,9 +24,22 @@ long previousMillisLight = 0;
 long intervalDisplay = 10000;
 boolean displayOn = true;
 boolean twelveHour = true;
-boolean alarmEnabled = true;
+boolean isAlarmEnabled = true;
 boolean firstOff = true;
 const boolean INVERT_DISPLAY = true; // true = pins at top | false = pins at the bottom
+
+AFArray<String> alarmName;
+AFArray<int> alarmTimeHour;
+AFArray<int> alarmTimeMinute;
+AFArray<boolean> alarmDayMonday;
+AFArray<boolean> alarmDayTuesday;
+AFArray<boolean> alarmDayWednesday;
+AFArray<boolean> alarmDayThursday;
+AFArray<boolean> alarmDayFriday;
+AFArray<boolean> alarmDaySaturday;
+AFArray<boolean> alarmDaySunday;
+AFArray<boolean> alarmRepeat;
+AFArray<boolean> alarmEnabled;
 
 const int buttonPin3 = A0;    //for the alarm snooze
 const int DATA = D0;          //for the shift register
@@ -90,9 +103,13 @@ void handleUpdateConfigure();
 void handleNotFound();
 void handleRoot();
 void handleConfigure();
+void handleAlarm();
+void handleUpdateAlarm();
 void initializePixels();
 uint32_t Wheel(byte WheelPos);
 void rainbowCycle();
+void alarmFunction();
+void updateTime();
 
 int rainbowCycleLoop0 = 0;
 int lastHour = 0;
@@ -260,7 +277,7 @@ void writeSettings() {
     Serial.println("Saving settings now...");
     f.println("timeZone=" + String(timeZone));
     f.println("twelveHour=" + String(twelveHour));
-    f.println("alarmEnabled=" + String(alarmEnabled));
+    f.println("isAlarmEnabled=" + String(isAlarmEnabled));
   }
   f.close();
   readSettings();
@@ -285,9 +302,9 @@ void readSettings() {
       twelveHour = line.substring(line.lastIndexOf("www_password=") + 11).toInt();
       Serial.println("twelveHour=" + String(twelveHour));
     }
-    if (line.indexOf("alarmEnabled=") >= 0) {
-      alarmEnabled = line.substring(line.lastIndexOf("alarmEnabled=") + 13).toInt();
-      Serial.println("alarmEnabled: " + String(alarmEnabled));
+    if (line.indexOf("isAlarmEnabled=") >= 0) {
+      isAlarmEnabled = line.substring(line.lastIndexOf("isAlarmEnabled=") + 13).toInt();
+      Serial.println("isAlarmEnabled: " + String(isAlarmEnabled));
     }
   }
   fr.close();
@@ -299,7 +316,7 @@ void readSettings() {
 void handleUpdateConfigure() { //editthis
   timeZone = server.arg("timezone").toInt();
   twelveHour = server.hasArg("twelvehour");
-  alarmEnabled = server.hasArg("alarmenabled");
+  isAlarmEnabled = server.hasArg("isalarmenabled");
 
   writeSettings();
   handleConfigure();
@@ -335,13 +352,90 @@ void handleConfigure() {
   if (twelveHour == true) {
     isTwelveHourChecked = "checked='checked'";
   }
-  if (alarmEnabled == true) {
+  if (isAlarmEnabled == true) {
     isAlarmEnabledChecked = "checked='checked'";
   }
   String form = parseConfigurePage();
   form.replace("%TIMEZONE%", String(timeZone));
   form.replace("%TWELVEHOUR%", isTwelveHourChecked);
-  form.replace("%ALARMENABLED%", isAlarmEnabledChecked);
+  form.replace("%ISALARMENABLED%", isAlarmEnabledChecked);
+
+  server.send(200, "text/html", form);  // Configure portal for the cloud
+}
+
+void handleAlarm() {
+  String isMondayChecked;
+  String isTuesdayChecked;
+  String isWednesdayChecked;
+  String isThursdayChecked;
+  String isFridayChecked;
+  String isSaturdayChecked;
+  String isSundayChecked;
+  String isRepeatChecked;
+  String isAlarmEnabledChecked;
+
+  String formTemplate;
+
+  for (int i = 0; i < alarmName.size(); i++) {
+    if (alarmDayMonday[i] == true) {
+      isMondayChecked = "checked='checked'";
+    }
+    if (alarmDayTuesday[i] == true) {
+      isTuesdayChecked = "checked='checked'";
+    }
+    if (alarmDayWednesday[i] == true) {
+      isWednesdayChecked = "checked='checked'";
+    }
+    if (alarmDayThursday[i] == true) {
+      isThursdayChecked = "checked='checked'";
+    }
+    if (alarmDayFriday[i] == true) {
+      isFridayChecked = "checked='checked'";
+    }
+    if (alarmDaySaturday[i] == true) {
+      isSaturdayChecked = "checked='checked'";
+    }
+    if (alarmDaySunday[i] == true) {
+      isSundayChecked = "checked='checked'";
+    }
+    if (alarmRepeat[i] == true) {
+      isRepeatChecked = "checked='checked'";
+    }
+    if (alarmEnabled[i] == true) {
+      isAlarmEnabledChecked = "checked='checked'";
+    }
+
+    String temp = getAlarmTemplate();
+    temp.replace("%MONDAY%", isMondayChecked);
+    temp.replace("%TUESDAY%", isTuesdayChecked);
+    temp.replace("%WEDNESDAY%", isWednesdayChecked);
+    temp.replace("%THURSDAY%", isThursdayChecked);
+    temp.replace("%FRIDAY%", isFridayChecked);
+    temp.replace("%SATURDAY%", isSaturdayChecked);
+    temp.replace("%SUNDAY%", isSundayChecked);
+    temp.replace("%REPEAT%", isRepeatChecked);
+    temp.replace("%ENABLED%", isAlarmEnabledChecked);
+    temp.replace("%HOUR%", String(alarmTimeHour[i]));
+    temp.replace("%MINUTE%", String(alarmTimeMinute[i]));
+    temp.replace("%NAME%", String(alarmName[i]));
+
+    temp.replace("%MONDAYNAME%", ("monday" + i));
+    temp.replace("%TUESDAYNAME%", ("tuesday" + i));
+    temp.replace("%WEDNESDAYNAME%", ("wednesday" + i));
+    temp.replace("%THURSDAYNAME%", ("thursday" + i));
+    temp.replace("%FRIDAYNAME%", ("friday" + i));
+    temp.replace("%SATURDAYNAME%", ("saturday" + i));
+    temp.replace("%SUNDAYNAME%", ("sunday" + i));
+    temp.replace("%REPEATNAME%", ("repeat" + i));
+    temp.replace("%ENABLEDNAME%", ("enabled" + i));
+    temp.replace("%HOURNAME%", ("hour" + i));
+    temp.replace("%MINUTENAME%", ("minute" + i));
+    temp.replace("%NAMENAME%", ("name" + i));
+
+    formTemplate += temp;
+  }
+
+  String form = parseAlarmPage(formTemplate);
 
   server.send(200, "text/html", form);  // Configure portal for the cloud
 }
@@ -420,4 +514,6 @@ void updateTime () {
   digitalWrite(LATCH, HIGH);
 }
 
-//void alarmFunction 
+void alarmFunction () {
+
+}
