@@ -19,6 +19,7 @@
 #define NUMPIXELS 300 //change to however many are used
 
 int timeZone = 0;
+int numberOfAlarms = 0;
 long previousMillisDisplay = 0;
 long previousMillisLight = 0;
 long intervalDisplay = 10000;
@@ -111,6 +112,7 @@ uint32_t Wheel(byte WheelPos);
 void rainbowCycle();
 void alarmFunction();
 void updateTime();
+void handleAddAlarm();
 
 int rainbowCycleLoop0 = 0;
 int lastHour = 0;
@@ -173,6 +175,7 @@ void setup() {
   server.on("/Configure", handleConfigure);
   server.on("/Alarm", handleAlarm);
   server.on("/updateConfig", handleUpdateConfigure);
+  server.on("/addAlarm", handleAddAlarm);
   server.on("/FactoryReset", handleSystemReset);
   server.on("/WifiReset", handleWifiReset);
   server.onNotFound(handleRoot);
@@ -502,6 +505,8 @@ void handleUpdateAlarm() {
         alarmDaySunday.set(i, server.hasArg(tempsu));
       }
     } else if (server.hasArg(tempDelete) == true) {
+      numberOfAlarms--;
+      
       AFArray<int> tempmin;
       AFArray<int> temphour;
       AFArray<String> tempname;
@@ -568,6 +573,11 @@ void handleUpdateAlarm() {
   handleAlarm();
 }
 
+void handleAddAlarm() {
+  numberOfAlarms++;
+  handleAlarm();
+}
+
 void handleNotFound() {
   server.send(404, "text/plain", "404: Not found"); // Send HTTP status 404 (Not Found) when there's no handler for the URL in the request
 }
@@ -627,7 +637,7 @@ void handleAlarm() { //editthis
 
   String formTemplate;
 
-  for (int i = 0; i < alarmName.size(); i++) {
+  for (int i = 0; i < numberOfAlarms; i++) {
     if (alarmDayMonday[i] == true) {
       isMondayChecked = "checked='checked'";
     }
@@ -740,10 +750,26 @@ uint32_t Wheel(byte WheelPos) {
 }
 
 void updateTime () {
-  byte currentSegmentOn[4];
-  byte currentSegmentOff[4];
-  int hour0 = (timeClient.getHours() / 10);
-  int hour1 = (timeClient.getHours() % 10);
+  int tempHours = timeClient.getHours();
+  if (isDaylightSavings == true) {
+    if (isTwelveHour == true) {
+      tempHours++;
+      tempHours -= 12;
+    } else {
+      tempHours++;
+    }
+  } else {
+    if (isTwelveHour == true) {
+      tempHours -= 12;
+    }
+  }
+
+  if (tempHours == 13 || tempHours == 25) {
+    tempHours = 1;
+  }
+
+  int hour0 = (tempHours / 10);
+  int hour1 = (tempHours % 10);
   int minute0 = (timeClient.getMinutes() / 10);
   int minute1 = (timeClient.getMinutes() % 10);
 

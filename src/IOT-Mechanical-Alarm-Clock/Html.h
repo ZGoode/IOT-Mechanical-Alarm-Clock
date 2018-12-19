@@ -80,7 +80,7 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
 String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
                    "<div class='w3-display-middle' style='white-space:nowrap;'>"
                    "<form class='w3-container' action='/updateAlarm' method='get'><h2>Alarms: </h2>"
-                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='button'>Add Alarm</button>"
+                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' action='/addAlarm' type='button'>Add Alarm</button>"
                    "<p> </p>"
                    "%ALARM%"
                    "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>"
