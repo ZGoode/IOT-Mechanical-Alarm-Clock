@@ -67,7 +67,7 @@ String homePage = "<!-- First Parallax Image with Logo Text -->"
 
 String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
                        "<div class='w3-display-middle' style='white-space:nowrap;'>"
-                       "<form class='w3-container' action='/updateConfig' method='get'><h2>Clock Config:</h2>"
+                       "<form class='w3-container' action='/updateConfig' method='get'><h1>Clock Config:</h1>"
                        "<p><label>Time Offset</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='timezone' value='%TIMEZONE%' onkeypress='return isNumberKey(event)'></p>"
                        "<p><input name='twelvehour' class='w3-check w3-margin-top' type='checkbox' %TWELVEHOUR%> Use 12 Hour Time</p>"
                        "<p><input name='daylightsavings' class='w3-check w3-margin-top' type='checkbox' %DAYLIGHTSAVINGS%> Daylight Savings</p>"
@@ -79,10 +79,8 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
 
 String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
                    "<div class='w3-display-middle' style='white-space:nowrap;'>"
-                   "<h2 class='w3-center'>Alarms:</h2>"
-                   "<form class='w3-container' action='/addAlarm' method='get'>"
-                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Add Alarm</button>"
-                   "</form>"
+                   "<h1 class='w3-center'>Alarms:</h1>"
+                   "%ADDALARM%"
                    "<form class='w3-container' action='/updateAlarm' method='get'>"
                    "<p> </p>"
                    "%ALARM%"
@@ -93,13 +91,25 @@ String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='h
 
 String alarmTemplate = "test"; //add the form for entering an alarm in
 
+String addAlarmButton = "<form class='w3-container' action='/addAlarm' method='get'>"
+                        "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Add Alarm</button>"
+                        "</form>";
+
+String maxAlarms = "<h4 class='w3-center'>You have used all 10 of your 10 alarms</h4>"
+                   "<h4 class='w3-center'>To add more either delete an alarm or change an existing one</h4>";
+
 String getAlarmTemplate() {
   return alarmTemplate;
 }
 
-String parseAlarmPage(String alarm) {
+String parseAlarmPage(String alarm, int x) {
   String form = header + alarmPage + footer;
   form.replace("%ALARM%", alarm);
+  if (x >= 10) {
+    form.replace("%ADDALARM%", maxAlarms);
+  } else {
+    form.replace("%ADDALARM%", addAlarmButton);
+  }
   return form;
 }
 

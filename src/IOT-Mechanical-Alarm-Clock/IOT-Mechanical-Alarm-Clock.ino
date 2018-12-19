@@ -712,7 +712,7 @@ void handleAlarm() { //editthis
     Serial.println(temp);
   }
 
-  String form = parseAlarmPage(formTemplate);
+  String form = parseAlarmPage(formTemplate, numberOfAlarms);
   Serial.println(formTemplate);
 
   server.send(200, "text/html", form);  // Configure portal for the cloud
