@@ -51,6 +51,7 @@ String header = "<!DOCTYPE html>"
                 "<div class='w3-bar' id='myNavbar'>"
                 "<a href='Home' class='w3-bar-item w3-button'>HOME</a>"
                 "<a href='Configure' class='w3-bar-item w3-button w3-hide-small'><i class='fa fa-cogs'></i> CONFIGURE</a>"
+                "<a href='Alarm' class='w3-bar-item w3-button w3-hide-small'><i class='fa fa-clock-o'></i> ALARM</a>"
                 "<a href='https://github.com/ZGoode/IOT-Mechanical-Alarm-Clock' class='w3-bar-item w3-button w3-hide-small'><i class='fa fa-th'></i> ABOUT</a>"
                 "<a href='/WifiReset' class='w3-bar-item w3-button w3-hide-small w3-right w3-hover-red'>WIFI RESET</a>"
                 "<a href='/FactoryReset' class='w3-bar-item w3-button w3-hide-small w3-right w3-hover-red'>FACTORY RESET</a>"
@@ -75,10 +76,16 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
                        "</div>"
                        "</div>";
 
-String alarmPage = "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='button'>Add Alarm</button>"
+String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
+                   "<div class='w3-display-middle' style='white-space:nowrap;'>"
+                   "<form class='w3-container' action='/updateAlarm' method='get'><h2>Alarms: </h2>"
+                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='button'>Add Alarm</button>"
                    "<p> </p>"
                    "%ALARM%"
-                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>";
+                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>"
+                   "</form>"
+                   "</div>"
+                   "</div>";
 
 String alarmTemplate = ""; //add the form for entering an alarm in
 

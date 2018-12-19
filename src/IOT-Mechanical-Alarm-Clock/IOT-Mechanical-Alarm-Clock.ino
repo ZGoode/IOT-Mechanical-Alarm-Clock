@@ -173,6 +173,7 @@ void setup() {
   //add server.on(); statements for webserver
   server.on("/Home", HTTP_GET, handleRoot);
   server.on("/Configure", handleConfigure);
+  server.on("/Alarm", handleAlarm);
   server.on("/updateConfig", handleUpdateConfigure);
   server.on("/FactoryReset", handleSystemReset);
   server.on("/WifiReset", handleWifiReset);
@@ -345,7 +346,7 @@ void readSettings() {
       Serial.println("twelveHour=" + String(twelveHour));
     }
     if (line.indexOf("isAlarmEnabled=") >= 0) {
-      isAlarmEnabled = line.substring(line.lastIndexOf("isAlarmEnabled=") + 13).toInt();
+      isAlarmEnabled = line.substring(line.lastIndexOf("isAlarmEnabled=") + 15).toInt();
       Serial.println("isAlarmEnabled: " + String(isAlarmEnabled));
     }
 
