@@ -23,7 +23,8 @@ long previousMillisDisplay = 0;
 long previousMillisLight = 0;
 long intervalDisplay = 10000;
 boolean displayOn = true;
-boolean twelveHour = true;
+boolean isTwelveHour = true;
+boolean isDaylightSavings = true;
 boolean isAlarmEnabled = true;
 boolean firstOff = true;
 const boolean INVERT_DISPLAY = true; // true = pins at top | false = pins at the bottom
@@ -110,9 +111,6 @@ uint32_t Wheel(byte WheelPos);
 void rainbowCycle();
 void alarmFunction();
 void updateTime();
-AFArray<boolean> sliceAFArray (AFArray<boolean> old, int x);
-AFArray<String> sliceAFArray (AFArray<String> old, int x);
-AFArray<int> sliceAFArray (AFArray<int> old, int x);
 
 int rainbowCycleLoop0 = 0;
 int lastHour = 0;
@@ -280,7 +278,7 @@ void writeSettings() {
   } else {
     Serial.println("Saving settings now...");
     f.println("timeZone=" + String(timeZone));
-    f.println("twelveHour=" + String(twelveHour));
+    f.println("isTwelveHour=" + String(isTwelveHour));
     f.println("isAlarmEnabled=" + String(isAlarmEnabled));
     for (int i = 0; i < alarmName.size(); i++) {
       String tempmo = "monday" + i;
@@ -341,9 +339,13 @@ void readSettings() {
       timeZone = line.substring(line.lastIndexOf("timeZone=") + 9).toInt();
       Serial.println("timeZone=" + String(timeZone));
     }
-    if (line.indexOf("twelveHour=") >= 0) {
-      twelveHour = line.substring(line.lastIndexOf("twelveHour=") + 11).toInt();
-      Serial.println("twelveHour=" + String(twelveHour));
+    if (line.indexOf("isTwelveHour=") >= 0) {
+      isTwelveHour = line.substring(line.lastIndexOf("isTwelveHour=") + 13).toInt();
+      Serial.println("isTwelveHour=" + String(isTwelveHour));
+    }
+    if (line.indexOf("isDaylightSavings=") >= 0) {
+      isDaylightSavings = line.substring(line.lastIndexOf("isDaylightSavings=") + 18).toInt();
+      Serial.println("isDaylightSavings=" + String(isDaylightSavings));
     }
     if (line.indexOf("isAlarmEnabled=") >= 0) {
       isAlarmEnabled = line.substring(line.lastIndexOf("isAlarmEnabled=") + 15).toInt();
@@ -447,7 +449,8 @@ void readSettings() {
 
 void handleUpdateConfigure() {
   timeZone = server.arg("timezone").toInt();
-  twelveHour = server.hasArg("twelvehour");
+  isTwelveHour = server.hasArg("twelvehour");
+  isDaylightSavings = server.hasArg("daylightsavings");
   isAlarmEnabled = server.hasArg("isalarmenabled");
 
   writeSettings();
@@ -591,9 +594,13 @@ int8_t getWifiQuality() {
 void handleConfigure() {
   String isTwelveHourChecked;
   String isAlarmEnabledChecked;
+  String isDaylightSavingsChecked;
 
-  if (twelveHour == true) {
+  if (isTwelveHour == true) {
     isTwelveHourChecked = "checked='checked'";
+  }
+  if (isDaylightSavings == true) {
+    isDaylightSavingsChecked = "checked='checked'";
   }
   if (isAlarmEnabled == true) {
     isAlarmEnabledChecked = "checked='checked'";
@@ -601,6 +608,7 @@ void handleConfigure() {
   String form = parseConfigurePage();
   form.replace("%TIMEZONE%", String(timeZone));
   form.replace("%TWELVEHOUR%", isTwelveHourChecked);
+  form.replace("%DAYLIGHTSAVINGS%", isDaylightSavingsChecked);
   form.replace("%ISALARMENABLED%", isAlarmEnabledChecked);
 
   server.send(200, "text/html", form);  // Configure portal for the cloud

@@ -70,6 +70,7 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
                        "<form class='w3-container' action='/updateConfig' method='get'><h2>Clock Config:</h2>"
                        "<p><label>Time Offset</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='timezone' value='%TIMEZONE%' onkeypress='return isNumberKey(event)'></p>"
                        "<p><input name='twelvehour' class='w3-check w3-margin-top' type='checkbox' %TWELVEHOUR%> Use 12 Hour Time</p>"
+                       "<p><input name='daylightsavings' class='w3-check w3-margin-top' type='checkbox' %DAYLIGHTSAVINGS%> Daylight Savings</p>"
                        "<p><input name='isalarmenabled' class='w3-check w3-margin-top' type='checkbox' %ISALARMENABLED%> Enable Alarm Functionality</p>"
                        "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>"
                        "</form>"
@@ -95,7 +96,7 @@ String getAlarmTemplate() {
 
 String parseAlarmPage(String alarm) {
   String form = header + alarmPage + footer;
-  form.replace("%ALARM&", alarm);
+  form.replace("%ALARM%", alarm);
   return form;
 }
 
