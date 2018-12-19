@@ -61,7 +61,7 @@ String header = "<!DOCTYPE html>"
 String homePage = "<!-- First Parallax Image with Logo Text -->"
                   "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
                   "<div class='w3-display-middle' style='white-space:nowrap;'>"
-                  "<p><span class='w3-center w3-padding-large w3-black w3-xlarge w3-wide w3-animate-opacity'>IOT<span class='w3-hide-small'> MECHANICAL </span> ALARM</span> CLOCK</span></p>"
+                  "<p><span class='w3-center w3-padding-large w3-black w3-xlarge w3-wide w3-animate-opacity'>IOT<span class='w3-hide-small'> MECHANICAL </span> ALARM CLOCK</span></p>"
                   "</div>"
                   "</div>";
 
@@ -79,8 +79,11 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
 
 String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='home'>"
                    "<div class='w3-display-middle' style='white-space:nowrap;'>"
-                   "<form class='w3-container' action='/updateAlarm' method='get'><h2>Alarms: </h2>"
-                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' action='/addAlarm' type='button'>Add Alarm</button>"
+                   "<h2 class='w3-center'>Alarms:</h2>"
+                   "<form class='w3-container' action='/addAlarm' method='get'>"
+                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Add Alarm</button>"
+                   "</form>"
+                   "<form class='w3-container' action='/updateAlarm' method='get'>"
                    "<p> </p>"
                    "%ALARM%"
                    "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>"
@@ -88,7 +91,7 @@ String alarmPage = "<div class='bgimg w3-display-container w3-opacity-min' id='h
                    "</div>"
                    "</div>";
 
-String alarmTemplate = ""; //add the form for entering an alarm in
+String alarmTemplate = "test"; //add the form for entering an alarm in
 
 String getAlarmTemplate() {
   return alarmTemplate;

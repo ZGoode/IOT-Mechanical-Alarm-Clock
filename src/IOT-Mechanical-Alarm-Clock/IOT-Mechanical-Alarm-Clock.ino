@@ -575,6 +575,8 @@ void handleUpdateAlarm() {
 
 void handleAddAlarm() {
   numberOfAlarms++;
+  Serial.println(numberOfAlarms);
+  
   handleAlarm();
 }
 
@@ -707,9 +709,11 @@ void handleAlarm() { //editthis
     temp.replace("%NAMENAME%", tempn);
 
     formTemplate += temp;
+    Serial.println(temp);
   }
 
   String form = parseAlarmPage(formTemplate);
+  Serial.println(formTemplate);
 
   server.send(200, "text/html", form);  // Configure portal for the cloud
 }
