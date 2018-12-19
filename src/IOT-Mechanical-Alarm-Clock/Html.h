@@ -75,9 +75,12 @@ String configurePage = "<div class='bgimg w3-display-container w3-opacity-min' i
                        "</div>"
                        "</div>";
 
-String alarmPage = "";
+String alarmPage = "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='button'>Add Alarm</button>"
+                   "<p> </p>"
+                   "%ALARM%"
+                   "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button>";
 
-String alarmTemplate = "";
+String alarmTemplate = ""; //add the form for entering an alarm in
 
 String getAlarmTemplate() {
   return alarmTemplate;

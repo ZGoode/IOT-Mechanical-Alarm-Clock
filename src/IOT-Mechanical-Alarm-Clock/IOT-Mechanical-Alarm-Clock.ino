@@ -110,6 +110,9 @@ uint32_t Wheel(byte WheelPos);
 void rainbowCycle();
 void alarmFunction();
 void updateTime();
+AFArray<boolean> sliceAFArray (AFArray<boolean> old, int x);
+AFArray<String> sliceAFArray (AFArray<String> old, int x);
+AFArray<int> sliceAFArray (AFArray<int> old, int x);
 
 int rainbowCycleLoop0 = 0;
 int lastHour = 0;
@@ -278,6 +281,45 @@ void writeSettings() {
     f.println("timeZone=" + String(timeZone));
     f.println("twelveHour=" + String(twelveHour));
     f.println("isAlarmEnabled=" + String(isAlarmEnabled));
+    for (int i = 0; i < alarmName.size(); i++) {
+      String tempmo = "monday" + i;
+      tempmo += "=";
+      String temptu = "tuesday" + i;
+      temptu += "=";
+      String tempw = "wednesday" + i;
+      tempw += "=";
+      String tempth = "thursday" + i;
+      tempth += "=";
+      String tempf = "friday" + i;
+      tempf += "=";
+      String tempsa = "saturday" + i;
+      tempsa += "=";
+      String tempsu = "sunday" + i;
+      tempsu += "=";
+      String tempr = "repeat" + i;
+      tempr += "=";
+      String tempe = "enabled" + i;
+      tempe += "=";
+      String temph = "hour" + i;
+      temph += "=";
+      String tempmi = "minute" + i;
+      tempmi += "=";
+      String tempn = "name" + i;
+      tempn += "=";
+
+      f.println(tempmo + String(alarmDayMonday[i]));
+      f.println(temptu + String(alarmDayTuesday[i]));
+      f.println(tempw + String(alarmDayWednesday[i]));
+      f.println(tempth + String(alarmDayThursday[i]));
+      f.println(tempf + String(alarmDayFriday[i]));
+      f.println(tempsa + String(alarmDaySaturday[i]));
+      f.println(tempsu + String(alarmDaySunday[i]));
+      f.println(tempr + String(alarmRepeat[i]));
+      f.println(tempe + String(alarmEnabled[i]));
+      f.println(temph + String(alarmTimeHour[i]));
+      f.println(tempmi + String(alarmTimeMinute[i]));
+      f.println(tempn + String(alarmName[i]));
+    }
   }
   f.close();
   readSettings();
@@ -299,12 +341,101 @@ void readSettings() {
       Serial.println("timeZone=" + String(timeZone));
     }
     if (line.indexOf("twelveHour=") >= 0) {
-      twelveHour = line.substring(line.lastIndexOf("www_password=") + 11).toInt();
+      twelveHour = line.substring(line.lastIndexOf("twelveHour=") + 11).toInt();
       Serial.println("twelveHour=" + String(twelveHour));
     }
     if (line.indexOf("isAlarmEnabled=") >= 0) {
       isAlarmEnabled = line.substring(line.lastIndexOf("isAlarmEnabled=") + 13).toInt();
       Serial.println("isAlarmEnabled: " + String(isAlarmEnabled));
+    }
+
+    alarmDayMonday.reset();
+    alarmDayTuesday.reset();
+    alarmDayWednesday.reset();
+    alarmDayThursday.reset();
+    alarmDayFriday.reset();
+    alarmDaySaturday.reset();
+    alarmDaySunday.reset();
+    alarmRepeat.reset();
+    alarmEnabled.reset();
+    alarmTimeHour.reset();
+    alarmTimeMinute.reset();
+    alarmName.reset();
+
+    for (int i = 0; i < alarmName.size(); i++) {
+      String tempmo = "monday" + i;
+      tempmo += "=";
+      String temptu = "tuesday" + i;
+      temptu += "=";
+      String tempw = "wednesday" + i;
+      tempw += "=";
+      String tempth = "thursday" + i;
+      tempth += "=";
+      String tempf = "friday" + i;
+      tempf += "=";
+      String tempsa = "saturday" + i;
+      tempsa += "=";
+      String tempsu = "sunday" + i;
+      tempsu += "=";
+      String tempr = "repeat" + i;
+      tempr += "=";
+      String tempe = "enabled" + i;
+      tempe += "=";
+      String temph = "hour" + i;
+      temph += "=";
+      String tempmi = "minute" + i;
+      tempmi += "=";
+      String tempn = "name" + i;
+      tempn += "=";
+
+      if (line.indexOf(tempmo) >= 0) {
+        alarmDayMonday.add(line.substring(line.lastIndexOf(tempmo) + tempmo.length()).toInt());
+        Serial.println(tempmo + String(alarmDayMonday[i]));
+      }
+      if (line.indexOf(temptu) >= 0) {
+        alarmDayTuesday.add(line.substring(line.lastIndexOf(temptu) + temptu.length()).toInt());
+        Serial.println(temptu + String(alarmDayTuesday[i]));
+      }
+      if (line.indexOf(tempw) >= 0) {
+        alarmDayWednesday.add(line.substring(line.lastIndexOf(tempw) + tempw.length()).toInt());
+        Serial.println(tempw + String(alarmDayWednesday[i]));
+      }
+      if (line.indexOf(tempth) >= 0) {
+        alarmDayThursday.add(line.substring(line.lastIndexOf(tempth) + tempth.length()).toInt());
+        Serial.println(tempth + String(alarmDayThursday[i]));
+      }
+      if (line.indexOf(tempf) >= 0) {
+        alarmDayFriday.add(line.substring(line.lastIndexOf(tempf) + tempf.length()).toInt());
+        Serial.println(tempf + String(alarmDayFriday[i]));
+      }
+      if (line.indexOf(tempsa) >= 0) {
+        alarmDaySaturday.add(line.substring(line.lastIndexOf(tempsa) + tempsa.length()).toInt());
+        Serial.println(tempsa + String(alarmDaySaturday[i]));
+      }
+      if (line.indexOf(tempsu) >= 0) {
+        alarmDaySunday.add(line.substring(line.lastIndexOf(tempsu) + tempsu.length()).toInt());
+        Serial.println(tempsu + String(alarmDaySunday[i]));
+      }
+      if (line.indexOf(tempr) >= 0) {
+        alarmRepeat.add(line.substring(line.lastIndexOf(tempr) + tempr.length()).toInt());
+        Serial.println(tempr + String(alarmRepeat[i]));
+      }
+      if (line.indexOf(tempe) >= 0) {
+        alarmEnabled.add(line.substring(line.lastIndexOf(tempe) + tempe.length()).toInt());
+        Serial.println(tempe + String(alarmEnabled[i]));
+      }
+      if (line.indexOf(temph) >= 0) {
+        alarmTimeHour.add(line.substring(line.lastIndexOf(temph) + temph.length()).toInt());
+        Serial.println(temph + String(alarmTimeHour[i]));
+      }
+      if (line.indexOf(tempmi) >= 0) {
+        alarmTimeMinute.add(line.substring(line.lastIndexOf(tempmi) + tempmi.length()).toInt());
+        Serial.println(tempmi + String(alarmTimeMinute[i]));
+      }
+      if (line.indexOf(tempn) >= 0) {
+        alarmName.add(line.substring(line.lastIndexOf(tempn) + tempn.length()));
+        Serial.println(tempn + alarmName[i]);
+      }
     }
   }
   fr.close();
@@ -313,13 +444,124 @@ void readSettings() {
   timeClient.begin();
 }
 
-void handleUpdateConfigure() { //editthis
+void handleUpdateConfigure() {
   timeZone = server.arg("timezone").toInt();
   twelveHour = server.hasArg("twelvehour");
   isAlarmEnabled = server.hasArg("isalarmenabled");
 
   writeSettings();
   handleConfigure();
+}
+
+void handleUpdateAlarm() {
+  for (int i = 0; i < alarmName.size(); i++) {
+    String tempmo = "monday" + i;
+    String temptu = "tuesday" + i;
+    String tempw = "wednesday" + i;
+    String tempth = "thursday" + i;
+    String tempf = "friday" + i;
+    String tempsa = "saturday" + i;
+    String tempsu = "sunday" + i;
+    String tempr = "repeat" + i;
+    String tempe = "enabled" + i;
+    String temph = "hour" + i;
+    String tempmi = "minute" + i;
+    String tempn = "name" + i;
+    String tempDelete = "delete" + i;
+
+    if (server.hasArg(tempDelete) == false) {
+      if (i > alarmName.size()) {
+        alarmTimeHour.add(server.arg(temph).toInt());
+        alarmTimeMinute.add(server.arg(tempmi).toInt());
+        alarmName.add(server.arg(tempn));
+        alarmEnabled.add(server.hasArg(tempe));
+        alarmRepeat.add(server.hasArg(tempr));
+        alarmDayMonday.add(server.hasArg(tempmo));
+        alarmDayTuesday.add(server.hasArg(temptu));
+        alarmDayWednesday.add(server.hasArg(tempw));
+        alarmDayThursday.add(server.hasArg(tempth));
+        alarmDayFriday.add(server.hasArg(tempf));
+        alarmDaySaturday.add(server.hasArg(tempsa));
+        alarmDaySunday.add(server.hasArg(tempsu));
+      } else {
+        alarmTimeHour.set(i, server.arg(temph).toInt());
+        alarmTimeMinute.set(i, server.arg(tempmi).toInt());
+        alarmName.set(i, server.arg(tempn));
+        alarmEnabled.set(i, server.hasArg(tempe));
+        alarmRepeat.set(i, server.hasArg(tempr));
+        alarmDayMonday.set(i, server.hasArg(tempmo));
+        alarmDayTuesday.set(i, server.hasArg(temptu));
+        alarmDayWednesday.set(i, server.hasArg(tempw));
+        alarmDayThursday.set(i, server.hasArg(tempth));
+        alarmDayFriday.set(i, server.hasArg(tempf));
+        alarmDaySaturday.set(i, server.hasArg(tempsa));
+        alarmDaySunday.set(i, server.hasArg(tempsu));
+      }
+    } else if (server.hasArg(tempDelete) == true) {
+      AFArray<int> tempmin;
+      AFArray<int> temphour;
+      AFArray<String> tempname;
+      AFArray<boolean> tempenabled;
+      AFArray<boolean> temprepeat;
+      AFArray<boolean> tempmon;
+      AFArray<boolean> temptue;
+      AFArray<boolean> tempwed;
+      AFArray<boolean> tempthu;
+      AFArray<boolean> tempfri;
+      AFArray<boolean> tempsat;
+      AFArray<boolean> tempsun;
+
+      for (int j = 0; j < alarmName.size(); j++) {
+        if (j != i) {
+          tempmin.add(alarmTimeMinute[j]);
+          temphour.add(alarmTimeHour[j]);
+          tempname.add(alarmName[j]);
+          tempenabled.add(alarmEnabled[j]);
+          temprepeat.add(alarmRepeat[j]);
+          tempmon.add(alarmDayMonday[j]);
+          temptue.add(alarmDayTuesday[j]);
+          tempwed.add(alarmDayWednesday[j]);
+          tempthu.add(alarmDayThursday[j]);
+          tempfri.add(alarmDayFriday[j]);
+          tempsat.add(alarmDaySaturday[j]);
+          tempsun.add(alarmDaySunday[j]);
+        }
+      }
+
+      alarmTimeHour.reset();
+      alarmTimeMinute.reset();
+      alarmName.reset();
+      alarmEnabled.reset();
+      alarmRepeat.reset();
+      alarmDayMonday.reset();
+      alarmDayTuesday.reset();
+      alarmDayWednesday.reset();
+      alarmDayThursday.reset();
+      alarmDayFriday.reset();
+      alarmDaySaturday.reset();
+      alarmDaySunday.reset();
+
+      for (int j = 0; j < tempname.size(); j++) {
+        alarmTimeMinute.add(tempmin[j]);
+        alarmTimeHour.add(temphour[j]);
+        alarmName.add(tempname[j]);
+        alarmEnabled.add(tempenabled[j]);
+        alarmRepeat.add(temprepeat[j]);
+        alarmDayMonday.add(tempmon[j]);
+        alarmDayTuesday.add(temptue[j]);
+        alarmDayWednesday.add(tempwed[j]);
+        alarmDayThursday.add(tempthu[j]);
+        alarmDayFriday.add(tempfri[j]);
+        alarmDaySaturday.add(tempsat[j]);
+        alarmDaySunday.add(tempsun[j]);
+      }
+
+      i--;
+    }
+  }
+
+  writeSettings();
+  handleAlarm();
 }
 
 void handleNotFound() {
@@ -363,7 +605,7 @@ void handleConfigure() {
   server.send(200, "text/html", form);  // Configure portal for the cloud
 }
 
-void handleAlarm() {
+void handleAlarm() { //editthis
   String isMondayChecked;
   String isTuesdayChecked;
   String isWednesdayChecked;
@@ -419,18 +661,31 @@ void handleAlarm() {
     temp.replace("%MINUTE%", String(alarmTimeMinute[i]));
     temp.replace("%NAME%", String(alarmName[i]));
 
-    temp.replace("%MONDAYNAME%", ("monday" + i));
-    temp.replace("%TUESDAYNAME%", ("tuesday" + i));
-    temp.replace("%WEDNESDAYNAME%", ("wednesday" + i));
-    temp.replace("%THURSDAYNAME%", ("thursday" + i));
-    temp.replace("%FRIDAYNAME%", ("friday" + i));
-    temp.replace("%SATURDAYNAME%", ("saturday" + i));
-    temp.replace("%SUNDAYNAME%", ("sunday" + i));
-    temp.replace("%REPEATNAME%", ("repeat" + i));
-    temp.replace("%ENABLEDNAME%", ("enabled" + i));
-    temp.replace("%HOURNAME%", ("hour" + i));
-    temp.replace("%MINUTENAME%", ("minute" + i));
-    temp.replace("%NAMENAME%", ("name" + i));
+    String tempmo = "monday" + i;
+    String temptu = "tuesday" + i;
+    String tempw = "wednesday" + i;
+    String tempth = "thursday" + i;
+    String tempf = "friday" + i;
+    String tempsa = "saturday" + i;
+    String tempsu = "sunday" + i;
+    String tempr = "repeat" + i;
+    String tempe = "enabled" + i;
+    String temph = "hour" + i;
+    String tempmi = "minute" + i;
+    String tempn = "name" + i;
+
+    temp.replace("%MONDAYNAME%", tempmo);
+    temp.replace("%TUESDAYNAME%", temptu);
+    temp.replace("%WEDNESDAYNAME%", tempw);
+    temp.replace("%THURSDAYNAME%", tempth);
+    temp.replace("%FRIDAYNAME%", tempf);
+    temp.replace("%SATURDAYNAME%", tempsa);
+    temp.replace("%SUNDAYNAME%", tempsu);
+    temp.replace("%REPEATNAME%", tempr);
+    temp.replace("%ENABLEDNAME%", tempe);
+    temp.replace("%HOURNAME%", temph);
+    temp.replace("%MINUTENAME%", tempmi);
+    temp.replace("%NAMENAME%", tempn);
 
     formTemplate += temp;
   }
